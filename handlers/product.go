@@ -119,14 +119,17 @@ func (db *AppHandler) GetProducts() http.Handler {
 		sortBy := query.Get("sort_by")
 		order := query.Get("order")
 
-		baseQuery := "SELECT id, name, description, quantity, price, seller_id, category, image_url FROM products WHERE 1=1"
+		baseQuery := "SELECT id, name, description, quantity, price, seller_id, category, image_url FROM products WHERE 1=1" // 1=1 ek koşulların koyulabilmesi için
+		args := []interface{}{} //sorgu parametrelerini tutan slice
 
 		if category != "" {
 			baseQuery += " AND category = ?"
+			args = append(args, category)
 		}
 		if search != "" {
 			baseQuery += " AND (name LIKE ? OR description LIKE ?)"
 			search = "%" + search + "%"
+			args = append(args, search, search)
 		}
 		if sortBy != "" {
 			baseQuery += " ORDER BY " + sortBy
@@ -137,14 +140,7 @@ func (db *AppHandler) GetProducts() http.Handler {
 			}
 		}
 
-		stmt, err := db.DB.Prepare(baseQuery)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer stmt.Close()
-
-		rows, err := stmt.Query(category, search, search)
+		rows, err := db.DB.Query(baseQuery, args...)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -165,3 +161,4 @@ func (db *AppHandler) GetProducts() http.Handler {
 		json.NewEncoder(w).Encode(products)
 	})
 }
+

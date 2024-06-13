@@ -33,6 +33,13 @@ func main() {
 	r.Handle("/product", middleware.JWTMiddleware(middleware.RoleMiddleware("seller")(appHandler.AddProduct()))).Methods("POST")
 	r.Handle("/product/{id}", middleware.JWTMiddleware(middleware.RoleMiddleware("seller")(appHandler.UpdateProduct()))).Methods("PUT")
 	r.Handle("/product/{id}", middleware.JWTMiddleware(middleware.RoleMiddleware("seller")(appHandler.DeleteProduct()))).Methods("DELETE")
+	r.Handle("/products", appHandler.GetProducts()).Methods("GET")
+	r.Handle("/cart", middleware.JWTMiddleware(appHandler.AddToCart())).Methods("POST")
+	r.Handle("/cart", middleware.JWTMiddleware(appHandler.GetCartItems())).Methods("GET")
+	r.Handle("/carts/remove/{item_id}", middleware.JWTMiddleware(appHandler.RemoveFromCart())).Methods("DELETE")
+	r.Handle("/carts/decrease/{item_id}", middleware.JWTMiddleware(appHandler.DecreaseItemQuantity())).Methods("PUT")
+	r.Handle("/carts/increase/{item_id}", middleware.JWTMiddleware(appHandler.IncreaseItemQuantity())).Methods("PUT")
+	r.Handle("/carts/remove/cart/items", middleware.JWTMiddleware(appHandler.RemoveCartItems())).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
