@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger" // swagger
 
 	_ "e-ticaret-api/docs" // Swag dokümantasyonu için gerekli
@@ -25,12 +26,18 @@ import (
 // @schemes http
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	if secretKey == "" {
 		log.Fatal("JWT_SECRET_KEY env is not set")
 	}
 
-	db := db.InitDB("root:Eses147852@tcp(127.0.0.1:3306)/e_commerce_api?parseTime=true")
+	databaseUrl := os.Getenv("DATABASE_URL")
+	db := db.InitDB(databaseUrl)
 	defer db.Close()
 	fmt.Println("Veritabanına bağlanıldı.")
 
