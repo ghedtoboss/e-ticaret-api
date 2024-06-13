@@ -84,6 +84,38 @@ definitions:
         example: 1
         type: integer
     type: object
+  models.Return:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      order_id:
+        type: integer
+      product_id:
+        type: integer
+      reason:
+        type: string
+      status:
+        description: pending, approved, rejected
+        type: string
+    type: object
+  models.Review:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      product_id:
+        type: integer
+      rating:
+        description: 1-5
+        type: integer
+      user_id:
+        type: integer
+    type: object
   models.User:
     description: Kullanıcı modelini temsil eder
     properties:
@@ -574,6 +606,109 @@ paths:
       summary: Get all products
       tags:
       - products
+  /returns:
+    get:
+      description: Get a list of return requests for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Return'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get return requests
+      tags:
+      - Returns
+    post:
+      consumes:
+      - application/json
+      description: Create a new return request for a product
+      parameters:
+      - description: Return request
+        in: body
+        name: return
+        required: true
+        schema:
+          $ref: '#/definitions/models.Return'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Return'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create a return request
+      tags:
+      - Returns
+  /reviews:
+    post:
+      consumes:
+      - application/json
+      description: Create a new review for a product
+      parameters:
+      - description: Review
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/models.Review'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Review'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create a product review
+      tags:
+      - Reviews
+  /reviews/{product_id}:
+    get:
+      description: Get a list of reviews for a product
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Review'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get product reviews
+      tags:
+      - Reviews
 schemes:
 - http
 swagger: "2.0"
