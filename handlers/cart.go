@@ -9,6 +9,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// AddToCart godoc
+// @Summary Add a product to the cart
+// @Description Add a product to the cart
+// @Tags cart
+// @Accept  json
+// @Produce  json
+// @Param cartItem body models.CartItem true "Cart Item"
+// @Success 201 {object} models.CartItem
+// @Failure 400 {string} string "Invalid request"
+// @Failure 500 {string} string "Internal server error"
+// @Router /cart [post]
 func (db *AppHandler) AddToCart() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value("userID").(int)
@@ -46,6 +57,14 @@ func (db *AppHandler) AddToCart() http.Handler {
 	})
 }
 
+// GetCartItems godoc
+// @Summary Get all items in the cart
+// @Description Get all items in the cart for the authenticated user
+// @Tags cart
+// @Produce  json
+// @Success 200 {array} models.CartItem
+// @Failure 500 {string} string "Internal server error"
+// @Router /cart [get]
 func (db *AppHandler) GetCartItems() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value("userID").(int)
@@ -79,6 +98,16 @@ func (db *AppHandler) GetCartItems() http.Handler {
 	})
 }
 
+// RemoveFromCart godoc
+// @Summary Remove an item from the cart
+// @Description Remove an item from the cart
+// @Tags cart
+// @Produce  json
+// @Param item_id path int true "Item ID"
+// @Success 200 {string} string "Ürün sepetten kaldırıldı."
+// @Failure 404 {string} string "Item not found in cart"
+// @Failure 500 {string} string "Internal server error"
+// @Router /carts/remove/{item_id} [delete]
 func (db *AppHandler) RemoveFromCart() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -112,6 +141,16 @@ func (db *AppHandler) RemoveFromCart() http.Handler {
 	})
 }
 
+// DecreaseItemQuantity godoc
+// @Summary Decrease the quantity of an item in the cart
+// @Description Decrease the quantity of an item in the cart
+// @Tags cart
+// @Produce  json
+// @Param item_id path int true "Item ID"
+// @Success 200 {string} string "Ürün adeti azaldı."
+// @Failure 404 {string} string "Cart not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /carts/decrease/{item_id} [put]
 func (db *AppHandler) DecreaseItemQuantity() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -188,6 +227,15 @@ func (db *AppHandler) DecreaseItemQuantity() http.Handler {
 	})
 }
 
+// IncreaseItemQuantity godoc
+// @Summary Increase the quantity of an item in the cart
+// @Description Increase the quantity of an item in the cart
+// @Tags cart
+// @Produce  json
+// @Param item_id path int true "Item ID"
+// @Success 200 {string} string "Ürün adeti arttırıldı."
+// @Failure 500 {string} string "Internal server error"
+// @Router /carts/increase/{item_id} [put]
 func (db *AppHandler) IncreaseItemQuantity() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -231,6 +279,14 @@ func (db *AppHandler) IncreaseItemQuantity() http.Handler {
 	})
 }
 
+// RemoveCartItems godoc
+// @Summary Remove all items from the cart
+// @Description Remove all items from the cart
+// @Tags cart
+// @Produce  json
+// @Success 200 {string} string "Sepet temizlendi."
+// @Failure 500 {string} string "Internal server error"
+// @Router /carts/remove/cart/items [delete]
 func (db *AppHandler) RemoveCartItems() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value("userID").(int)

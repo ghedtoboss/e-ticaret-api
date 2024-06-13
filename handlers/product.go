@@ -8,6 +8,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// AddProduct godoc
+// @Summary Add a new product
+// @Description Add a new product by seller
+// @Tags products
+// @Produce  json
+// @Param product body models.Product true "Product to add"
+// @Success 201 {object} models.Product
+// @Failure 400 {string} string "Bad request"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 500 {string} string "Internal server error"
+// @Router /product [post]
 func (db *AppHandler) AddProduct() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		UserID := r.Context().Value("userID").(int)
@@ -39,10 +50,21 @@ func (db *AppHandler) AddProduct() http.Handler {
 
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(product)
-
 	})
 }
 
+// UpdateProduct godoc
+// @Summary Update an existing product
+// @Description Update an existing product by seller
+// @Tags products
+// @Produce  json
+// @Param id path int true "Product ID"
+// @Param product body models.Product true "Product to update"
+// @Success 204 {object} models.Product
+// @Failure 400 {string} string "Bad request"
+// @Failure 404 {string} string "Product not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /product/{id} [put]
 func (db *AppHandler) UpdateProduct() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -85,10 +107,19 @@ func (db *AppHandler) UpdateProduct() http.Handler {
 
 		w.WriteHeader(http.StatusNoContent)
 		json.NewEncoder(w).Encode(existProduct)
-
 	})
 }
 
+// DeleteProduct godoc
+// @Summary Delete a product
+// @Description Delete a product by seller
+// @Tags products
+// @Produce  json
+// @Param id path int true "Product ID"
+// @Success 200 {string} string "Product deleted"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 500 {string} string "Internal server error"
+// @Router /product/{id} [delete]
 func (db *AppHandler) DeleteProduct() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -96,7 +127,7 @@ func (db *AppHandler) DeleteProduct() http.Handler {
 
 		UserRole := r.Context().Value("role").(string)
 		if UserRole != "seller" {
-			http.Error(w, "Sadece satıcılar ürün silinebilir.", http.StatusUnauthorized)
+			http.Error(w, "Sadece satıcılar ürün silebilir.", http.StatusUnauthorized)
 			return
 		}
 
@@ -111,6 +142,18 @@ func (db *AppHandler) DeleteProduct() http.Handler {
 	})
 }
 
+// GetProducts godoc
+// @Summary Get all products
+// @Description Get all products with optional filters
+// @Tags products
+// @Produce  json
+// @Param category query string false "Category"
+// @Param search query string false "Search term"
+// @Param sort_by query string false "Sort by"
+// @Param order query string false "Order (asc or desc)"
+// @Success 200 {array} models.Product
+// @Failure 500 {string} string "Internal server error"
+// @Router /products [get]
 func (db *AppHandler) GetProducts() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()
@@ -161,4 +204,3 @@ func (db *AppHandler) GetProducts() http.Handler {
 		json.NewEncoder(w).Encode(products)
 	})
 }
-

@@ -1,0 +1,579 @@
+basePath: /
+definitions:
+  models.CartItem:
+    description: Sepet öğesi modelini temsil eder
+    properties:
+      cart_id:
+        example: 1
+        type: integer
+      id:
+        example: 1
+        type: integer
+      price:
+        example: 19.99
+        type: number
+      product_id:
+        example: 1
+        type: integer
+      quantity:
+        example: 1
+        type: integer
+    type: object
+  models.Order:
+    description: Sipariş modelini temsil eder
+    properties:
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      status:
+        example: pending
+        type: string
+      total_price:
+        example: 199.99
+        type: number
+      user_id:
+        example: 1
+        type: integer
+    type: object
+  models.OrderItem:
+    description: Sipariş öğesi modelini temsil eder
+    properties:
+      id:
+        example: 1
+        type: integer
+      order_id:
+        example: 1
+        type: integer
+      price:
+        example: 99.99
+        type: number
+      product_id:
+        example: 1
+        type: integer
+      quantity:
+        example: 2
+        type: integer
+    type: object
+  models.Product:
+    description: Ürün modelini temsil eder
+    properties:
+      category:
+        example: Electronics
+        type: string
+      description:
+        example: Description
+        type: string
+      id:
+        example: 1
+        type: integer
+      image_url:
+        example: http://...
+        type: string
+      name:
+        example: Product Name
+        type: string
+      price:
+        example: 19.99
+        type: number
+      quantity:
+        example: 100
+        type: integer
+      seller_id:
+        example: 1
+        type: integer
+    type: object
+  models.User:
+    description: Kullanıcı modelini temsil eder
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: John Doe
+        type: string
+      password:
+        type: string
+      role:
+        example: seller
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: E-Ticaret API dokümantasyonu.
+  title: E-Ticaret API
+  version: "1.0"
+paths:
+  /admin/orders:
+    get:
+      consumes:
+      - application/json
+      description: Get all orders by admin
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Order'
+            type: array
+        "403":
+          description: Only admin can access this endpoint
+          schema:
+            type: string
+        "500":
+          description: Error fetching orders
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get all orders by admin
+      tags:
+      - admin
+  /admin/products:
+    post:
+      consumes:
+      - application/json
+      description: Add a new product by admin
+      parameters:
+      - description: Product
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "403":
+          description: Only admin can add products
+          schema:
+            type: string
+        "500":
+          description: Error adding product
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Add a product by admin
+      tags:
+      - admin
+  /admin/users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users by admin
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "403":
+          description: Only admin can access this endpoint
+          schema:
+            type: string
+        "500":
+          description: Error fetching users
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get all users
+      tags:
+      - admin
+  /cart:
+    get:
+      description: Get all items in the cart for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CartItem'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get all items in the cart
+      tags:
+      - cart
+    post:
+      consumes:
+      - application/json
+      description: Add a product to the cart
+      parameters:
+      - description: Cart Item
+        in: body
+        name: cartItem
+        required: true
+        schema:
+          $ref: '#/definitions/models.CartItem'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CartItem'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Add a product to the cart
+      tags:
+      - cart
+  /carts/decrease/{item_id}:
+    put:
+      description: Decrease the quantity of an item in the cart
+      parameters:
+      - description: Item ID
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ürün adeti azaldı.
+          schema:
+            type: string
+        "404":
+          description: Cart not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Decrease the quantity of an item in the cart
+      tags:
+      - cart
+  /carts/increase/{item_id}:
+    put:
+      description: Increase the quantity of an item in the cart
+      parameters:
+      - description: Item ID
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ürün adeti arttırıldı.
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Increase the quantity of an item in the cart
+      tags:
+      - cart
+  /carts/remove/{item_id}:
+    delete:
+      description: Remove an item from the cart
+      parameters:
+      - description: Item ID
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ürün sepetten kaldırıldı.
+          schema:
+            type: string
+        "404":
+          description: Item not found in cart
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Remove an item from the cart
+      tags:
+      - cart
+  /carts/remove/cart/items:
+    delete:
+      description: Remove all items from the cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sepet temizlendi.
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Remove all items from the cart
+      tags:
+      - cart
+  /order:
+    post:
+      description: Create an order for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Cart not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create an order
+      tags:
+      - orders
+  /orders:
+    get:
+      description: Get all orders for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Order'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get all orders
+      tags:
+      - orders
+  /orders/{order_id}:
+    get:
+      description: Get all items for a specific order
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.OrderItem'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get all items for a specific order
+      tags:
+      - orders
+  /orders/{order_id}/status:
+    put:
+      description: Update the status of an order
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: integer
+      - description: Order Status
+        in: body
+        name: status
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order status updated
+          schema:
+            type: string
+        "403":
+          description: Only admin can update order status
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update the status of an order
+      tags:
+      - orders
+  /product:
+    post:
+      description: Add a new product by seller
+      parameters:
+      - description: Product to add
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Add a new product
+      tags:
+      - products
+  /product/{id}:
+    delete:
+      description: Delete a product by seller
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product deleted
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete a product
+      tags:
+      - products
+    put:
+      description: Update an existing product by seller
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product to update
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Product not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update an existing product
+      tags:
+      - products
+  /products:
+    get:
+      description: Get all products with optional filters
+      parameters:
+      - description: Category
+        in: query
+        name: category
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - description: Sort by
+        in: query
+        name: sort_by
+        type: string
+      - description: Order (asc or desc)
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get all products
+      tags:
+      - products
+schemes:
+- http
+swagger: "2.0"
