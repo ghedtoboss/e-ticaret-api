@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger" // swagger
 
 	_ "e-ticaret-api/docs" // Swag dokümantasyonu için gerekli
@@ -25,12 +26,18 @@ import (
 // @schemes http
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	if secretKey == "" {
 		log.Fatal("JWT_SECRET_KEY env is not set")
 	}
 
-	db := db.InitDB("root:Eses147852@tcp(127.0.0.1:3306)/e_commerce_api?parseTime=true")
+	databaseUrl := os.Getenv("DATABASE_URL")
+	db := db.InitDB(databaseUrl)
 	defer db.Close()
 	fmt.Println("Veritabanına bağlanıldı.")
 
@@ -285,6 +292,48 @@ func main() {
 	// @Router /admin/orders [get]
 	// @Security ApiKeyAuth
 	r.Handle("/admin/orders", middleware.JWTMiddleware(middleware.RoleMiddleware("admin")(appHandler.GetAllOrders()))).Methods("GET")
+
+	// @Summary Create a return
+	// @Description Create a return for an order
+	// @Tags Returns
+	// @Accept json
+	// @Produce json
+	// @Security ApiKeyAuth
+	// @Param return body models.Return true "Return"
+	// @Success 201 {object} models.Return
+	// @Router /returns [post]
+	r.Handle("/returns", middleware.JWTMiddleware(appHandler.CreateReturn())).Methods("POST")
+
+	// @Summary Get returns
+	// @Description Get all returns for a user
+	// @Tags Returns
+	// @Accept json
+	// @Produce json
+	// @Security ApiKeyAuth
+	// @Success 200 {array} models.Return
+	// @Router /returns [get]
+	r.Handle("/returns", middleware.JWTMiddleware(appHandler.GetReturns())).Methods("GET")
+
+	// @Summary Create a review
+	// @Description Create a review for a product
+	// @Tags Reviews
+	// @Accept json
+	// @Produce json
+	// @Security ApiKeyAuth
+	// @Param review body models.Review true "Review"
+	// @Success 201 {object} models.Review
+	// @Router /reviews [post]
+	r.Handle("/reviews", middleware.JWTMiddleware(appHandler.CreateReview())).Methods("POST")
+
+	// @Summary Get reviews for a product
+	// @Description Get all reviews for a specific product
+	// @Tags Reviews
+	// @Accept json
+	// @Produce json
+	// @Param product_id path int true "Product ID"
+	// @Success 200 {array} models.Review
+	// @Router /reviews/{product_id} [get]
+	r.Handle("/reviews/{product_id}", appHandler.GetReviews()).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
